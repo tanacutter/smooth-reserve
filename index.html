@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>smooth reserve</title>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+    class MenuApp extends React.Component {
+      constructor() {
+        super();
+        this.state = {
+          type : ''
+        };
+        this.narrowType = this.narrowType.bind(this);
+      }
+
+      // クリックを解除した時も見張っていく。
+      narrowType(type) {
+        // this.setState({type : this.state.type.concat({id: 'x', selected:true, item:''});
+        this.setState({type : type});
+      }
+
+      render() {
+        return (
+          <div className="MenuPage">
+            {this.state.type}
+            <NarrowDown narrowType={this.narrowType} />
+            <MenuList selectedType={this.state.type} />
+          </div>
+        );
+      }
+
+    }
+
+    class NarrowDown extends React.Component {
+      _narrowType(type) {
+        this.props.narrowType(type);
+      }
+
+      render() {
+        let narrows;
+        narrows = [
+          {
+            id: 1,
+            item: 'カット',
+            type: 'cut'
+          },
+          {
+            id: 2,
+            item: 'カラー',
+            type: 'color'
+          },
+          {
+            id: 3,
+            item: 'パーマ',
+            type: 'permanent'
+          }
+        ];
+
+        return(
+          <ul>
+            {
+              narrows.map(function(narrow){
+                  return (
+                    <li key={narrow.id}>
+                      <input type="checkbox" onClick={() => this._narrowType(narrow.type)} />{narrow.item}
+                    </li>
+                  )
+              }, this)
+            }
+          </ul>
+        );
+      }
+    }
+
+    // 表示するアイテム一覧を制御する
+    class MenuList extends React.Component {
+      render() {
+        let selectedType = this.props.selectedType;
+        let menus;
+        menus = [
+          {
+            id: 1,
+            item: 'カット',
+            type: 'cut'
+          },
+          {
+            id: 2,
+            item: 'パーティーヘアセット',
+            type: 'set'
+          },
+          {
+            id: 3,
+            item: 'オーガニックカラー',
+            type: 'color'
+          },
+          {
+            id: 4,
+            item: 'イルミナリタッチカラー',
+            type: 'color'
+          },
+          {
+            id: 5,
+            item: 'メンズカット',
+            type: 'cut'
+          },
+          {
+            id: 6,
+            item: 'ナノケア縮毛矯正',
+            type: 'permanent'
+          },
+          {
+            id: 7,
+            item: '前髪顔周り縮毛矯正',
+            type: 'permanent'
+          }
+        ];
+
+        return(
+          <ul>
+            {
+              
+              menus.map(function(menu){
+                if (selectedType === '') {
+                  return (
+                    <li key={menu.id}>
+                      {menu.item}
+                    </li>
+                } else {
+                  if (menu.type === selectedType) {
+                    return (
+                      <li key={menu.id}>
+                        {menu.item}
+                      </li>
+                    )
+                  }
+                }
+              })
+
+            }
+          </ul>
+        );
+      }
+    }
+
+    ReactDOM.render(
+      <MenuApp />,
+      document.getElementById('root')
+    );
+
+    </script>
+  </body>
+</html>
