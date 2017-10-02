@@ -10,36 +10,24 @@
   <body>
     <div id="root"></div>
     <script type="text/babel">
-    class MenuApp extends React.Component {
-      constructor() {
+    // メニューを表示する
+    class MenuDisplay extends React.Component {
+      constructor(){
         super();
-        this.state = {
-          type : ''
-        };
-        this.narrowType = this.narrowType.bind(this);
       }
 
-      // クリックを解除した時も見張っていく。
-      narrowType(type) {
-        // this.setState({type : this.state.type.concat({id: 'x', selected:true, item:''});
-        this.setState({type : type});
-      }
-
-      render() {
+      render(){
         return (
-          <div className="MenuPage">
-            {this.state.type}
-            <NarrowDown narrowType={this.narrowType} />
-            <MenuList selectedType={this.state.type} />
-          </div>
+          <li className="menu">
+            メニューを表示
+          </li>
         );
       }
-
     }
 
     class NarrowDown extends React.Component {
-      _narrowType(type) {
-        this.props.narrowType(type);
+      _narrowClick(narrowObj) {
+        this.props.narrowClick(narrowObj);
       }
 
       render() {
@@ -47,17 +35,17 @@
         narrows = [
           {
             id: 1,
-            item: 'カット',
+            name: 'カット',
             type: 'cut'
           },
           {
             id: 2,
-            item: 'カラー',
+            name: 'カラー',
             type: 'color'
           },
           {
             id: 3,
-            item: 'パーマ',
+            name: 'パーマ',
             type: 'permanent'
           }
         ];
@@ -68,7 +56,7 @@
               narrows.map(function(narrow){
                   return (
                     <li key={narrow.id}>
-                      <input type="checkbox" onClick={() => this._narrowType(narrow.type)} />{narrow.item}
+                      <input type="checkbox" onClick={() => this._narrowClick(narrow)} />{narrow.name}
                     </li>
                   )
               }, this)
@@ -86,37 +74,37 @@
         menus = [
           {
             id: 1,
-            item: 'カット',
+            name: 'カット',
             type: 'cut'
           },
           {
             id: 2,
-            item: 'パーティーヘアセット',
+            name: 'パーティーヘアセット',
             type: 'set'
           },
           {
             id: 3,
-            item: 'オーガニックカラー',
+            name: 'オーガニックカラー',
             type: 'color'
           },
           {
             id: 4,
-            item: 'イルミナリタッチカラー',
+            name: 'イルミナリタッチカラー',
             type: 'color'
           },
           {
             id: 5,
-            item: 'メンズカット',
+            name: 'メンズカット',
             type: 'cut'
           },
           {
             id: 6,
-            item: 'ナノケア縮毛矯正',
+            name: 'ナノケア縮毛矯正',
             type: 'permanent'
           },
           {
             id: 7,
-            item: '前髪顔周り縮毛矯正',
+            name: '前髪顔周り縮毛矯正',
             type: 'permanent'
           }
         ];
@@ -124,20 +112,21 @@
         return(
           <ul>
             {
-              
+
               menus.map(function(menu){
                 if (selectedType === '') {
                   return (
                     <li key={menu.id}>
-                      {menu.item}
+                      {menu.name}
                     </li>
+                    );
                 } else {
                   if (menu.type === selectedType) {
                     return (
                       <li key={menu.id}>
-                        {menu.item}
+                        {menu.name}
                       </li>
-                    )
+                    );
                   }
                 }
               })
@@ -146,6 +135,56 @@
           </ul>
         );
       }
+    }
+
+    // state管理
+    class MenuApp extends React.Component {
+      constructor() {
+        super();
+        this.state = {
+          selectedMenu: [
+            {id: 1, selected:false, name:''}
+          ],
+          type : ''
+        };
+        this.narrowType = this.narrowType.bind(this);
+        this.narrowClick = this.narrowClick.bind(this);
+      }
+
+      narrowClick(narrowObj) {
+        let selectedMenu = this.state.selectedMenu.slice();
+        let foundFlg = 0;
+        for (var i = 0; i<=this.state.selectedMenu.length - 1; i++) {
+          if (this.state.selectedMenu[i].id === narrowObj.id) {
+            selectedMenu[i] = {id:narrowObj.id, selected:this.state.selectedMenu[i].selected, name:narrowObj.name}
+            this.setState({selectedMenu: selectedMenu});
+
+            foundFlg === 1;
+          }
+        }
+
+        if (foundFlg === 0) {
+          this.setState({id:narrowObj.id, selected:true, name:narrowObj.item})
+        }
+
+      }
+
+      // クリックを解除した時も見張っていく。
+      narrowType(type) {
+        // this.setState({type : this.state.type.concat({id: 'x', selected:true, item:''});
+        this.setState({type : type});
+      }
+
+      render() {
+        return (
+          <div className="MenuPage">
+            {this.state.type}
+            <NarrowDown narrowClick={this.narrowClick} />
+            <MenuList selectedType={this.state.type} />
+          </div>
+        );
+      }
+
     }
 
     ReactDOM.render(
