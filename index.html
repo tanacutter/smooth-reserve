@@ -10,22 +10,8 @@
   <body>
     <div id="root"></div>
     <script type="text/babel">
-    // メニューを表示する
-    class MenuDisplay extends React.Component {
-      constructor(){
-        super();
-      }
-
-      render(){
-        return (
-          <li className="menu">
-            メニューを表示
-          </li>
-        );
-      }
-    }
-
-    class NarrowDown extends React.Component {
+    // 絞込メニューを表示
+    class NarrowList extends React.Component {
       _narrowClick(narrowObj) {
         this.props.narrowClick(narrowObj);
       }
@@ -66,10 +52,11 @@
       }
     }
 
-    // 表示するアイテム一覧を制御する
+    // メニューを表示
     class MenuList extends React.Component {
       render() {
-        let selectedType = this.props.selectedType;
+        let selectedMenu = this.props.selectedMenu;
+        let selectedFlg = this.props.selectedFlg
         let menus;
         menus = [
           {
@@ -112,25 +99,25 @@
         return(
           <ul>
             {
-
               menus.map(function(menu){
-                if (selectedType === '') {
+                if (selectedFlg === false) {
                   return (
                     <li key={menu.id}>
                       {menu.name}
                     </li>
-                    );
+                  );                  
                 } else {
-                  if (menu.type === selectedType) {
-                    return (
-                      <li key={menu.id}>
-                        {menu.name}
-                      </li>
-                    );
+                  for (var i = 0; i<=selectedMenu.length - 1; i++) {
+                    if (menu.type === selectedMenu[i].type && selectedMenu[i].selected === true) {
+                      return (
+                        <li key={menu.id}>
+                          {menu.name}
+                        </li>
+                      );
+                    }
                   }
                 }
               })
-
             }
           </ul>
         );
@@ -142,45 +129,53 @@
       constructor() {
         super();
         this.state = {
-          selectedMenu: [
-            {id: 1, selected:false, name:''}
-          ],
-          type : ''
+          selectedMenu: [],
+          selectedFlg : false
         };
-        this.narrowType = this.narrowType.bind(this);
         this.narrowClick = this.narrowClick.bind(this);
       }
 
       narrowClick(narrowObj) {
+        // stete更新用
         let selectedMenu = this.state.selectedMenu.slice();
-        let foundFlg = 0;
-        for (var i = 0; i<=this.state.selectedMenu.length - 1; i++) {
-          if (this.state.selectedMenu[i].id === narrowObj.id) {
-            selectedMenu[i] = {id:narrowObj.id, selected:this.state.selectedMenu[i].selected, name:narrowObj.name}
-            this.setState({selectedMenu: selectedMenu});
-
-            foundFlg === 1;
+        let foundMenuInState = false;
+        if (this.state.selectedMenu.length) {
+          for (var i = 0; i<=this.state.selectedMenu.length - 1; i++) {
+            // クリック要素がstate内にあるかどうか
+            if (this.state.selectedMenu[i].id === narrowObj.id) {
+              selectedMenu[i] = {id:narrowObj.id, selected:!this.state.selectedMenu[i].selected, type:narrowObj.type}
+              foundMenuInState = true;
+            }
           }
+          if (foundMenuInState === false) {
+            selectedMenu = selectedMenu.concat([{id:narrowObj.id, selected:true, type:narrowObj.type}]);
+          }
+        } else {
+          selectedMenu = selectedMenu.concat([{id:narrowObj.id, selected:true, type:narrowObj.type}]);
         }
 
-        if (foundFlg === 0) {
-          this.setState({id:narrowObj.id, selected:true, name:narrowObj.item})
-        }
+        this.setState({selectedMenu: selectedMenu}, function(){
+            console.log(this.state.selectedMenu);
+            let selectedNarrow = false;
+            for (var i = 0; i<=this.state.selectedMenu.length - 1; i++) {
+              // 絞込メニューが１つでもチェックされているか
+              if (this.state.selectedMenu[i].selected === true) {
+                selectedNarrow = true;
+              }
+            }
+            this.setState({selectedFlg: selectedNarrow},function(){console.log(selectedNarrow);});
+        });
 
-      }
-
-      // クリックを解除した時も見張っていく。
-      narrowType(type) {
-        // this.setState({type : this.state.type.concat({id: 'x', selected:true, item:''});
-        this.setState({type : type});
       }
 
       render() {
         return (
           <div className="MenuPage">
-            {this.state.type}
-            <NarrowDown narrowClick={this.narrowClick} />
-            <MenuList selectedType={this.state.type} />
+            <NarrowList narrowClick={this.narrowClick} />
+            <MenuList
+              selectedMenu={this.state.selectedMenu}
+              selectedFlg={this.state.selectedFlg}
+            />
           </div>
         );
       }
